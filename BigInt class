@@ -1,0 +1,88 @@
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+class bigint: public vector<int>
+{
+    // I am definitng a new class called "bigint", but
+    // it borrows and contains the definitions of everything
+    // that is inside a vector<int>
+    // this is called INHERITANCE
+
+  public:
+    void become(string s)
+    { clear();
+      for (int i = s.length()-1; i >= 0; i -= 1)
+      { int digval = s[i] - '0';
+        if (digval < 0 || digval > 9)
+        { cerr << "invalid digit\n";
+          exit(1); }
+        push_back(digval); } }
+
+    void debug()
+    { for (int i = 0; i < size(); i += 1)
+        cout << i << ": " << at(i) << ", ";
+      cout << "\n"; }
+
+    void print()
+    { for (int i = size()-1; i >= 0; i -= 1)
+        cout << at(i);
+      cout << "\n"; }
+
+    int get_digit(int pos)
+    { if (pos >= size())
+        return 0;
+      return at(pos); }
+
+    void set_digit(int pos, int newval)
+    { if (pos == size())
+        push_back(newval);
+      else
+        at(pos) = newval; }
+
+    void increment()
+    { int pos = 0;
+      while (get_digit(pos) == 9)
+      { set_digit(pos, 0);
+        pos += 1; }
+      set_digit(pos, get_digit(pos)+1); }
+
+    void add(bigint & A, bigint & B)
+    { // reference just to avoid wasting time coping,
+      // we will not change A or B
+      clear();
+      int pos = 0, carry = 0;
+      while (pos < A.size() || pos < B.size() || carry > 0)
+      { int sum = A.get_digit(pos) + B.get_digit(pos) + carry;
+        carry = sum / 10;
+        push_back(sum % 10);
+        pos += 1; } }
+
+    void subtract(bigint & A, bigint & B)
+    { clear();
+      int pos = 0, borrow = 0;
+      while (pos < A.size() || pos < B.size())
+      { int diff = A.get_digit(pos) - B.get_digit(pos) - borrow;
+        if (diff < 0)
+        { diff += 10;
+          borrow = 1; }
+        else
+          borrow = 0;
+        push_back(diff);
+        pos += 1; } }
+};
+
+int main()
+{
+  bigint A, B, C;
+  while (true)
+  { string s;
+    cin >> s;
+    A.become(s);
+    cin >> s;
+    B.become(s);
+    C.subtract(A, B);
+    C.print(); }
+}
+
